@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sayısal Loto Oyunu</title>
+    <style>
+        #selectedNumbers {
+            margin-top: 10px;
+        }
+        #resultNumbers,
+        #matchedNumbers {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sayısal Loto Oyunu</h1>
+    <p>Aşağıdaki imputlara tahminlerini giriniz:</p>
+    <form id="lottoForm">
+        <input type="number" min="1" max="49" id="number1" required>
+        <input type="number" min="1" max="49" id="number2" required>
+        <input type="number" min="1" max="49" id="number3" required>
+        <input type="number" min="1" max="49" id="number4" required>
+        <input type="number" min="1" max="49" id="number5" required>
+        <input type="number" min="1" max="49" id="number6" required>
+        <button type="button" id="forecastButton">Tahmin gir</button>
+    </form>
+    <div id="selectedNumbers"></div>
+    <div id="resultNumbers"></div>
+    <div id="matchedNumbers"></div>
+    <button id="drawButton" disabled>Kurayı çek</button>
+
+    <script>
+        const forecastButton = document.getElementById("forecastButton");
+        const drawButton = document.getElementById("drawButton");
+        const lottoForm = document.getElementById("lottoForm");
+        const numberInputs = Array.from(document.querySelectorAll('input[type="number"]'));
+        const selectedNumbers = new Set();
+
+        numberInputs.forEach(input => {
+        input.addEventListener("change", function(event) {
+            const enteredNumber = parseInt(event.target.value);
+            if (enteredNumber < 1 || enteredNumber > 49) {
+                alert("1-49 sayıları arasında bir sayı girmelisiniz.");
+                event.target.value = "";  // Clear the input
+            } else if (selectedNumbers.has(enteredNumber)) {
+                alert("Aynı tahmin bir kez girilebilir.");
+                event.target.value = "";  
+            } else {
+                selectedNumbers.add(enteredNumber);
+            }
+        });
+    });
+
+
+        forecastButton.addEventListener("click", function() {
+            if (selectedNumbers.size !== 6) {
+                alert("Please enter 6 unique numbers.");
+                return;
+            }
+
+            const selectedNumbersArray = Array.from(selectedNumbers);
+            selectedNumbersArray.sort((a, b) => a - b); 
+            displaySelectedNumbers(selectedNumbersArray);
+            generateLottoNumbers(selectedNumbersArray);
+            forecastButton.disabled = true;
+            drawButton.disabled = false;
+            displayPredictionEnteredMessage();
+        });
+
+        drawButton.addEventListener("click", function() {
+            drawButton.disabled = true;
+            const resultNumbersDiv = document.getElementById("resultNumbers");
+            const matchedNumbersDiv = document.getElementById("matchedNumbers");
+            resultNumbersDiv.style.display = "block";
+            matchedNumbersDiv.style.display = "block";
+        });
+
+        function displaySelectedNumbers(numbers) {
+            const selectedNumbersDiv = document.getElementById("selectedNumbers");
+            selectedNumbersDiv.innerHTML = "<p>Tahminler girildi: " + numbers.join(", ") + "</p>";
+        }
+
+        function generateLottoNumbers(userNumbers) {
+            const lottoNumbers = [];
+            while (lottoNumbers.length < 6) {
+                const randomNumber = Math.floor(Math.random() * 49) + 1;
+                if (!lottoNumbers.includes(randomNumber) && !userNumbers.includes(randomNumber)) {
+                    lottoNumbers.push(randomNumber);
+                }
+            }
+            lottoNumbers.sort((a, b) => a - b); 
+            displayResultNumbers(lottoNumbers);
+            displayMatchedNumbers(userNumbers, lottoNumbers);
+        }
+
+        function displayResultNumbers(numbers) {
+            const resultNumbersDiv = document.getElementById("resultNumbers");
+            resultNumbersDiv.innerHTML = "<p>Loto sayıları: " + numbers.join(", ") + "</p>";
+        }
+
+        function displayMatchedNumbers(userNumbers, lottoNumbers) {
+            const matchedNumbersDiv = document.getElementById("matchedNumbers");
+            const matched = userNumbers.filter(number => lottoNumbers.includes(number));
+            matchedNumbersDiv.innerHTML = "<p>Bilinen sayılar: " + matched.join(", ") + "</p>";
+            matchedNumbersDiv.innerHTML += "<p>" + matched.length + " adet sayı bildiniz" + "</p>";
+
+        }
+
+        function displayPredictionEnteredMessage() {
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = "Tahminler girildi";
+            document.body.appendChild(messageDiv);
+            setTimeout(function() {
+                messageDiv.style.display = "none";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
